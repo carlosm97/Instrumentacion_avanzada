@@ -48,7 +48,7 @@ lam_max = sigma*1e7/int(m)*(np.sin(alpha)+np.sin(2*Blaze_SI+alpha))
 D_lam = 2*lam/(2*int(m)+3)
 
 # Considerando un criterio de ancho de filtro de +-1/3 o +-1/4:
-print('Ancho del filtro entre ',D_lam,'\AA')
+print('Ancho del filtro ',D_lam,'\AA')
 
 
 # In[ii] Pureza espectral dada por la red
@@ -67,7 +67,7 @@ Beta = np.arcsin(int(m)*lam*1e-7/sigma) # Ángulo Beta, sacado de la ecuación d
 
 R = W*(np.sin(Beta)+np.sin(alpha))/Phi/D # Ec. 13.2.5 del Astronomical Optics
 d_lam = lam/R
-print(d_lam)
+print('Pureza espectral dada por la red: ',d_lam,'\AA')
 
 
 

@@ -14,7 +14,8 @@ import os
 h = 6.626e-34 # J/s
 c = 2.998e8 # m/s
 # Problem data
-r = 0.75 # m
+D = 1.5 # m
+r = D/2 # m
 lamb = 550e-9 # m
 pixel = 0.33 #arcsec/pixel
 
@@ -24,13 +25,13 @@ F_ib0 = 3.565e-8 # W/m**2/\mu m**-1 = J/s/m**2/\mu m**-1
 # Average energy of a photon in the detector:
 E_0 = h*c/lamb # J
 # Number of photons per second
-P_0 = F_ib0/E_0 # 1/s/m**2/\mu m**-1  
+F_0 = F_ib0/E_0 # 1/s/m**2/\mu m**-1  
 B = 0.1 # \mu m. Bandwidth
 Q = 0.2 # photon/electron convertion
 # Total flux at the focus of the telescope 
-T_0 = P_0*B*Q*np.pi*r**2 # electrons/s
+P_0 = F_0*B*Q*np.pi*r**2 # electrons/s
 
-print('Total flux at the focus of the telescope of a 0 magnitude star: ',T_0)
+print('Total flux at the focus of the telescope of a 0 magnitude star: ',P_0)
 mag_15 = True
 if mag_15==True: # Case election (a or b)
     m15,m14 = 15.000, 14.999
@@ -39,7 +40,7 @@ elif mag_15==False:
 FWHM = 1 
 
 # -----------------------FLUX OF OUR STARS AND SKY-----------------------------
-P = lambda m : T_0*10**(-0.4*m) # Function to compute the photons per second 
+P = lambda m : P_0*10**(-0.4*m) # Function to compute the photons per second 
 
 # For our magnitudes:
 P_15,P_14 = P(m15),P(m14) # electrons/s
@@ -75,20 +76,24 @@ integrated_counts_14, integrated_counts_15 = P_14*fraction, P_15*fraction # Tota
 
 
 
-# Total exposure time to reach the required limit.    
+#-------------Total exposure time to reach the required limit.-----------------
 t = (integrated_counts_14+integrated_counts_15+2*sky_background)/\
     (integrated_counts_14**2+integrated_counts_15**2-2*integrated_counts_14*integrated_counts_15)
-
+t_ = (integrated_counts_14+integrated_counts_15+2*sky_background)/\
+    (integrated_counts_14-integrated_counts_15)**2
 dist = lambda total,r,sig: total/2/np.pi/sig**2*np.exp(-r**2/2/sig**2)
 
 # Counts in the central pixel considering a gaussian distribution:
 C_cent_14, C_cent_15 = dist(P_14,0,sig_pix), dist(P_15,0,sig_pix)
+# We use sigma in pixels in order to get the distribution in this unit.
 # consideing the sky
 C_cent_14 += P_s_p
 C_cent_15 += P_s_p
 
-t_max = (C_cent_14+np.sqrt(C_cent_14+4*1e8*C_cent_14**2))/(2*C_cent_14**2)
+A, B, C = C_cent_14**2, -C_cent_14*(1+2e4), 1e8
 
+t_max = (-B-np.sqrt(B**2-4*A*C))/2/A
+print(C_cent_14*abs(t_max)+np.sqrt(C_cent_14*abs(t_max)))
 # Number of exposures:
 
 n = t/t_max
